@@ -1,0 +1,34 @@
+#!/bin/bash
+
+BASE=/var/www
+
+. /etc/avanzamenti.conf
+
+for i in $( ls $BASE/ ); do
+
+    # echo "valuto $i"
+
+    if [ -d $BASE/$i/htdocs/ ]; then
+
+        # echo "cartella $i/htdocs/ trovata"
+
+        for d in $( ls $BASE/$i/htdocs/ ); do
+
+            if [ -d $BASE/$i/htdocs/$d/ ]; then
+
+                echo "faccio il backup di $d"
+
+                DST=$BASE/$i/backups/files/$d
+                mkdir -p $DST
+
+                tar -cvzf $DST/$( date '+%Y%m%d' ).$( date '+%H%M%S' ).tar.gz -C $BASE/$i/htdocs/ ./$d/
+
+                find $DST -type f -mtime +3 -exec rm {} \;
+
+            fi
+
+        done
+
+    fi
+
+done
