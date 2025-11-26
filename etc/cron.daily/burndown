@@ -1,0 +1,39 @@
+#!/bin/bash
+
+GTOT=0
+BASE=/var/www
+
+for i in $(find $BASE -maxdepth 1 -type d); do
+
+    # echo "scansiono $i"
+    cd $i
+
+    if [ -f TODO.md ]; then
+
+        TODO=$(grep -Fwc '[ ]' TODO.md)
+        DONE=$(grep -Fwc '[v]' TODO.md)
+        DROP=$(grep -Fwc '[x]' TODO.md)
+
+        TOT=$((TODO - DONE - DROP))
+
+        if [ $TOT != "" -a $TOT -gt 0 ]; then
+
+            PBARL=$( expr $TOT / 5 )
+            PBAR=$( seq 1 $PBARL | xargs -I {} printf "#" )
+            PTODAY=$( printf "%12s" $TOT )
+
+            echo "$( date '+%Y-%m-%d' ) $PTODAY | $PBAR" >> $i/burndown.md
+
+            GTOT=$((GTOT + TOT))
+
+        fi
+
+    fi
+
+done
+
+BARL=$( expr $GTOT / 5 )
+BAR=$( seq 1 $BARL | xargs -I {} printf "#" )
+TODAY=$( printf "%12s" $GTOT )
+
+echo "$( date '+%Y-%m-%d' ) $TODAY | $BAR" >> $BASE/burndown.md
