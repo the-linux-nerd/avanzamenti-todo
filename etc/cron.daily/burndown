@@ -3,6 +3,8 @@
 GTOT=0
 BASE=/var/www
 
+. /etc/avanzamenti.conf
+
 for i in $(find $BASE -maxdepth 1 -type d); do
 
     # echo "scansiono $i"

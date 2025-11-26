@@ -3,6 +3,8 @@
 BASE=/var/www
 NPRG=0
 
+. /etc/avanzamenti.conf
+
 source va.txt.progressbar.sh
 
 echo "AVANZAMENTO PROGETTI"
