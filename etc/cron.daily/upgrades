@@ -8,32 +8,30 @@ for i in $(find $BASE/ -mindepth 1 -maxdepth 1 -type d); do
 
     cd $i
 
-    find . -maxdepth 1 -type f -mtime +5 -name "backup.*.tar.gz" -delete
+    if [ -d "./htdocs" ]; then
 
-    for f in dev test stable; do
+        for f in $(find ./htdocs -mindepth 1 -maxdepth 1 -type d); do
 
-        if [ -d "./$f" ]; then
-
-            if [ -d "./$f/var/spool/" ]; then
-                find ./$f/var/spool/ -type f -mtime +5 -delete
+            if [ -d "$f/var/spool/" ]; then
+                find $f/var/spool/ -type f -mtime +5 -delete
             fi
 
-            if [ -d "./$f/var/log/" ]; then
-                find ./$f/var/log/ -type f -mtime +3 -delete
+            if [ -d "$f/var/log/" ]; then
+                find $f/var/log/ -type f -mtime +3 -delete
             fi
 
-            if [ -d "./$f/tmp/" ]; then
+            if [ -d "$f/tmp/" ]; then
                 rm -rf ./$f/tmp/*
             fi
 
-        fi
+            if [ -f "./htdocs/update.branch.conf" ]; then
+                if [ -f $f/_src/_sh/_gw.upgrade.sh ]; then
+                    $f/_src/_sh/_gw.upgrade.sh $( cat ./htdocs/update.branch.conf )
+                fi
+            fi
 
-    done
+        done
 
-    if [ -f "./update.branch.conf" ]; then
-        if [ -f ./dev/_src/_sh/_gw.upgrade.sh ]; then
-            ./dev/_src/_sh/_gw.upgrade.sh $( cat ./update.branch.conf )
-        fi
     fi
 
 done
