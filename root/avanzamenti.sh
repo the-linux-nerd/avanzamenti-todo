@@ -31,7 +31,7 @@ echo
 
 SAL=""
 
-for i in $(find $BASE -maxdepth 1 -type d); do
+for i in $(find $BASE -maxdepth 1 -type d | sort -h); do
 
     # echo "scansiono $i"
     cd $i
@@ -98,7 +98,7 @@ echo "=============="
 echo "data            da fare | grafico"
 echo "----------------------- | -------------------------------------------------------------------------------------------------------------------------------------"
 
-ROWS=30
+ROWS=38
 ROWS=$((ROWS-NPRG))
 
 if [ -f $BASE/burndown.md ]; then
