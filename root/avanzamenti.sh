@@ -76,9 +76,9 @@ for i in $(find $BASE -maxdepth 1 -type d | sort -h); do
 
             echo
 
-        fi
+            ((NPRG++))
 
-        ((NPRG++))
+        fi
 
     fi
 
