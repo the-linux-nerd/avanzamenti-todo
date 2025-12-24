@@ -61,9 +61,14 @@ for i in $(find $BASE -maxdepth 1 -type d | sort -h); do
             printf " | "
             printf "%12s" "$TOT"
 
-            SAL="$SAL$(grep 'SAL PIANIFICATA' TODO.md)"
+            if [ -n "$(grep 'SAL PIANIFICATA' TODO.md)" ]; then
 
-            SAL=$( echo "$SAL" | sed "s/SAL PIANIFICATA/${i##*/}§/" )
+                SAL="$SAL$(grep 'SAL PIANIFICATA' TODO.md)"
+                SAL=$( echo "$SAL" | sed "s/SAL PIANIFICATA/${i##*/}§/" )
+
+                ((NPRG++))
+
+            fi
 
 #            PROG=$( echo "scale=2 ; $DONE / $TOT" | bc )
 #            PERC=$( echo "scale=2 ; $PROG * 100" | bc )
@@ -85,10 +90,14 @@ for i in $(find $BASE -maxdepth 1 -type d | sort -h); do
 done
 
 if [ -n "$( echo "$SAL" | sed 's/§/\n/g' | sort -h | head -n 5 | sed '/^$/d' )" ]; then
+
     echo
     echo "PROSSIME SAL"
     echo "============"
     echo "$SAL" | sed 's/§/\n/g' | sort -h | head -n 5 | sed '/^$/d'
+
+    ((NPRG+=3))
+
 fi
 
 echo
