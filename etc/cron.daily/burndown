@@ -2,40 +2,35 @@
 
 GTOT=0
 BASE=/var/www
+TODAY=$(date +%Y-%m-%d)
 
-. /etc/avanzamenti.conf
+for i in "$BASE"/*; do
+    [ -d "$i" ] || continue
+    cd "$i" || continue
 
-for i in $(find $BASE -maxdepth 1 -type d); do
+    if [ -f "TODO.md" ]; then
+        TODO=$(grep -Ec '^- \[ \]' TODO.md)
+        DONE=$(grep -Ec '^- \[v\]' TODO.md)
+        DROP=$(grep -Ec '^- \[x\]' TODO.md)
 
-    # echo "scansiono $i"
-    cd $i
+        TOT=$TODO
 
-    if [ -f TODO.md ]; then
+        if [ "$TOT" -gt 0 ]; then
+            PBARL=$((TOT / 5))
+            PBAR=$(printf '%*s' "$PBARL" '' | tr ' ' '#')
+            PTODAY=$(printf "%12s" "$TOT")
 
-        TODO=$(grep -Fwc '[ ]' TODO.md)
-        DONE=$(grep -Fwc '[v]' TODO.md)
-        DROP=$(grep -Fwc '[x]' TODO.md)
-
-        TOT=$((TODO - DONE - DROP))
-
-        if [ $TOT != "" -a $TOT -gt 0 ]; then
-
-            PBARL=$( expr $TOT / 5 )
-            PBAR=$( seq 1 $PBARL | xargs -I {} printf "#" )
-            PTODAY=$( printf "%12s" $TOT )
-
-            echo "$( date '+%Y-%m-%d' ) $PTODAY | $PBAR" >> $i/burndown.md
+            sed -i "/^$TODAY/d" "$i/burndown.md"
+            echo "$TODAY $PTODAY | $PBAR" >> "$i/burndown.md"
 
             GTOT=$((GTOT + TOT))
-
         fi
-
     fi
-
 done
 
-BARL=$( expr $GTOT / 5 )
-BAR=$( seq 1 $BARL | xargs -I {} printf "#" )
-TODAY=$( printf "%12s" $GTOT )
+BARL=$((GTOT / 5))
+BAR=$(printf '%*s' "$BARL" '' | tr ' ' '#')
+TODAYTOT=$(printf "%12s" "$GTOT")
 
-echo "$( date '+%Y-%m-%d' ) $TODAY | $BAR" >> $BASE/burndown.md
+sed -i "/^$TODAY/d" "$BASE/burndown.md"
+echo "$TODAY $TODAYTOT | $BAR" >> "$BASE/burndown.md"
