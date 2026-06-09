@@ -25,5 +25,5 @@ Questo script aggiorna il framework per i progetti che hanno il file update.bran
 ## /root/avanzamenti.sh
 Questo script rappresenta la situazione attuale di tutti i progetti.
 
-## /usr/bin/va.txt.progressbar.sh
+## /usr/local/bin/va.txt.progressbar.sh
 Questa libreria contiene le funzioni che generano le progress bar.
