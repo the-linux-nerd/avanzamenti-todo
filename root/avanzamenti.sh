@@ -44,13 +44,25 @@ for i in $(find $BASE -maxdepth 1 -type d | sort -h); do
             DISALLINEAMENTI=""
         fi
 
-        TODO=$(grep -Fwc '[ ]' TODO.md)
-        DONE=$(grep -Fwc '[v]' TODO.md)
-        DROP=$(grep -Fwc '[x]' TODO.md)
+        # conteggi ancorati a inizio riga, identici a quelli di cron.daily/burndown:
+        # prima qui si usava grep -Fwc, non ancorato, e bastava un marcatore citato a
+        # meta' riga o una voce scritta senza il "- " iniziale per far divergere il
+        # cruscotto dalla burndown chart
+        TODO=$(grep -Ec '^- \[ \]' TODO.md)
+        DEEP=$(grep -Ec '^- \[\?\]' TODO.md)
+        DONE=$(grep -Ec '^- \[v\]' TODO.md)
+        DROP=$(grep -Ec '^- \[x\]' TODO.md)
+
+        # [?] e' aperta e da approfondire: sta con le aperte
+        TODO=$((TODO + DEEP))
 
         TOT=$((TODO + DONE + DROP))
 
-        if [ $TODO != "" -a $TODO -gt 0 ]; then
+        # si mostra il progetto anche quando non ha piu' nulla di aperto (prima era
+        # "TODO -gt 0" e i progetti finiti sparivano dal cruscotto); il guardiano vero
+        # e' TOT, perche' progressbar divide per TOT e con un TODO.md vuoto darebbe
+        # una divisione per zero in bc
+        if [ "$TOT" -gt 0 ]; then
 
             printf "%-36s " ${i##*/}
             progressbar $((DONE + DROP)) $TOT 60 12

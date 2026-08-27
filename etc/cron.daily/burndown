@@ -2,6 +2,9 @@
 
 GTOT=0
 BASE=/var/www
+
+. /etc/avanzamenti.conf
+
 TODAY=$(date +%Y-%m-%d)
 
 for i in "$BASE"/*; do
@@ -10,21 +13,28 @@ for i in "$BASE"/*; do
 
     if [ -f "TODO.md" ]; then
         TODO=$(grep -Ec '^- \[ \]' TODO.md)
+        DEEP=$(grep -Ec '^- \[\?\]' TODO.md)
         DONE=$(grep -Ec '^- \[v\]' TODO.md)
         DROP=$(grep -Ec '^- \[x\]' TODO.md)
 
-        TOT=$TODO
+        # [?] e' una cosa da fare aperta che necessita approfondimento: va contata
+        # fra le aperte, altrimenti sparisce dal burndown pur essendo lavoro residuo
+        TOT=$((TODO + DEEP))
 
-        if [ "$TOT" -gt 0 ]; then
-            PBARL=$((TOT / 5))
-            PBAR=$(printf '%*s' "$PBARL" '' | tr ' ' '#')
-            PTODAY=$(printf "%12s" "$TOT")
+        PBARL=$((TOT / 5))
+        PBAR=$(printf '%*s' "$PBARL" '' | tr ' ' '#')
+        PTODAY=$(printf "%12s" "$TOT")
 
-            sed -i "/^$TODAY/d" "$i/burndown.md"
-            echo "$TODAY $PTODAY | $PBAR" >> "$i/burndown.md"
+        # la riga si scrive SEMPRE, anche a zero: prima si saltava con "if TOT > 0"
+        # e la serie di un progetto finito si interrompeva senza distinguersi da un
+        # generatore fermo, proprio nel punto piu' significativo della curva
+        #
+        # il file puo' non esistere al primo giro di un progetto nuovo: senza questo
+        # test sed -i fallirebbe e manderebbe una mail di cron a ogni esecuzione
+        [ -f "$i/burndown.md" ] && sed -i "/^$TODAY/d" "$i/burndown.md"
+        echo "$TODAY $PTODAY | $PBAR" >> "$i/burndown.md"
 
-            GTOT=$((GTOT + TOT))
-        fi
+        GTOT=$((GTOT + TOT))
     fi
 done
 
@@ -32,5 +42,5 @@ BARL=$((GTOT / 5))
 BAR=$(printf '%*s' "$BARL" '' | tr ' ' '#')
 TODAYTOT=$(printf "%12s" "$GTOT")
 
-sed -i "/^$TODAY/d" "$BASE/burndown.md"
+[ -f "$BASE/burndown.md" ] && sed -i "/^$TODAY/d" "$BASE/burndown.md"
 echo "$TODAY $TODAYTOT | $BAR" >> "$BASE/burndown.md"

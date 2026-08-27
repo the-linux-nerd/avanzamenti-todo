@@ -30,13 +30,18 @@ as a project only if it contains a `TODO.md`. Task state is encoded by markers
 **at the start of a line**:
 
 - `- [ ]` — to do
+- `- [?]` — to do, needs investigation before it can be worked on
 - `- [v]` — done
-- `- [x]` — dropped/cancelled
+- `- [x]` — dropped/cancelled, kept only for the record
 
-Note the inconsistency to respect when changing parsing: `burndown` counts with
-anchored regex (`^- \[ \]`), while `avanzamenti.sh` counts with `grep -Fwc '[ ]'`
-(unanchored, word-bounded). Changing one without the other will desync the
-displayed totals.
+`[ ]` and `[?]` are both **open** and both count toward the remaining total; `[v]`
+and `[x]` are both **closed**. Any other marker is a mistake to be normalised, not
+a state to be supported.
+
+Both counters use the same anchored regex (`^- \[ \]`, `^- \[?\]`, ...). They used
+to differ — `avanzamenti.sh` counted with `grep -Fwc '[ ]'`, unanchored — and a
+single task written without the leading `- ` was enough to desync the dashboard
+from the burndown chart. Keep them anchored and keep them identical.
 
 Other per-project / global files:
 - `TODO.md` may contain a `SAL PIANIFICATA <date>` line — `avanzamenti.sh`
