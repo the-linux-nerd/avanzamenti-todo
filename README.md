@@ -18,13 +18,24 @@ fare e' **una riga che inizia a colonna 1** con il suo marcatore:
 
 ```
 - [ ] cosa da fare
+- [=] decisa, ferma solo perche' la palla e' di un altro
 - [?] cosa da fare, ma prima serve un approfondimento
 - [v] fatta
 - [x] scartata, tenuta solo per memoria storica
 ```
 
-`[ ]` e `[?]` sono aperte e finiscono nel conteggio del residuo; `[v]` e `[x]` sono
-chiuse. Non esistono altri marcatori: se ne trovi uno diverso e' un errore da
+Il residuo e' `[ ]` + `[=]`, cioe' le due che torneranno: una `[=]` e' lavoro
+deciso, aspetta qualcuno e prima o poi va fatta. Una `[?]` invece e' aperta ma non
+si sa nemmeno se va fatta, quindi sta in "attesa" insieme a `[=]` nella colonna
+del cruscotto e non gonfia il residuo -- tenerla dentro faceva sembrare il
+progetto piu' carico di quello che e'.
+
+`[v]` e `[x]` sono chiuse. Dal TODO.md di un progetto possono traslocare in un
+`DONE.md` accanto: i contatori le sommano da tutti e due i file, altrimenti il
+giorno della potatura sparirebbe tutto il fatto e la curva farebbe un salto che
+non corrisponde a niente.
+
+Non esistono altri marcatori: se ne trovi uno diverso e' un errore da
 normalizzare.
 
 Due regole che sembrano pignole e non lo sono, perche' i conteggi sono ancorati a
