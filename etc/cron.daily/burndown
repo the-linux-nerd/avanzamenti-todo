@@ -13,13 +13,30 @@ for i in "$BASE"/*; do
 
     if [ -f "TODO.md" ]; then
         TODO=$(grep -Ec '^- \[ \]' TODO.md)
+        WAIT=$(grep -Ec '^- \[=\]' TODO.md)
         DEEP=$(grep -Ec '^- \[\?\]' TODO.md)
-        DONE=$(grep -Ec '^- \[v\]' TODO.md)
-        DROP=$(grep -Ec '^- \[x\]' TODO.md)
 
-        # [?] e' una cosa da fare aperta che necessita approfondimento: va contata
-        # fra le aperte, altrimenti sparisce dal burndown pur essendo lavoro residuo
-        TOT=$((TODO + DEEP))
+        # Le chiuse vivono in DONE.md: dal 08/09/2026 il TODO.md tiene solo il lavoro aperto e
+        # le voci [v]/[x] traslocano nell'archivio. Contarle solo qui farebbe sparire tutto il
+        # fatto il giorno della potatura, con un salto nella curva che non corrisponde a niente.
+        # grep -c stampa comunque il numero ed esce 1 quando non trova nulla: un
+        # '|| echo 0' qui concatenerebbe due valori e romperebbe l'espressione aritmetica
+        DONE_ARCH=0
+        DROP_ARCH=0
+        if [ -f DONE.md ]; then
+            DONE_ARCH=$(grep -Ec '^- \[v\]' DONE.md)
+            DROP_ARCH=$(grep -Ec '^- \[x\]' DONE.md)
+        fi
+        DONE=$(( $(grep -Ec '^- \[v\]' TODO.md) + DONE_ARCH ))
+        DROP=$(( $(grep -Ec '^- \[x\]' TODO.md) + DROP_ARCH ))
+
+        # Dal 16/09/2026 il residuo e' [ ] + [=], e NON comprende piu' [?].
+        # Il criterio e' "questo lavoro tornera'?": una [=] e' decisa e ferma solo perche' la
+        # palla e' di un altro, quindi tornera' e resta nel residuo; una [?] non si sa nemmeno
+        # se va fatta, e tenerla dentro faceva sembrare il progetto piu' carico di quello che e'.
+        # ⚠ Il giorno in cui questo e' entrato in vigore la curva scende di uno scalino pari al
+        # numero di [?] esistenti: e' il cambio di criterio, non lavoro chiuso.
+        TOT=$((TODO + WAIT))
 
         PBARL=$((TOT / 5))
         PBAR=$(printf '%*s' "$PBARL" '' | tr ' ' '#')

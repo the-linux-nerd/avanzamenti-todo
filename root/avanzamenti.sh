@@ -15,10 +15,12 @@ if [ -f $BASE/notes.md ]; then
     fi
 fi
 
-printf "%-36s | %-60s | %12s | %12s | %12s | %12s \n" "progetto" "avanzamento" "%" "disall." "fatte" "totale"
+printf "%-36s | %-60s | %12s | %12s | %12s | %12s | %12s \n" "progetto" "avanzamento" "%" "disall." "fatte" "attesa" "totale"
 printf "%0.s-" {1..36}
 printf " | "
 printf "%0.s-" {1..60}
+printf " | "
+printf "%0.s-" {1..12}
 printf " | "
 printf "%0.s-" {1..12}
 printf " | "
@@ -49,14 +51,29 @@ for i in $(find $BASE -maxdepth 1 -type d | sort -h); do
         # meta' riga o una voce scritta senza il "- " iniziale per far divergere il
         # cruscotto dalla burndown chart
         TODO=$(grep -Ec '^- \[ \]' TODO.md)
+        WAIT=$(grep -Ec '^- \[=\]' TODO.md)
         DEEP=$(grep -Ec '^- \[\?\]' TODO.md)
-        DONE=$(grep -Ec '^- \[v\]' TODO.md)
-        DROP=$(grep -Ec '^- \[x\]' TODO.md)
 
-        # [?] e' aperta e da approfondire: sta con le aperte
-        TODO=$((TODO + DEEP))
+        # Le chiuse vivono in DONE.md: dal 08/09/2026 il TODO.md tiene solo il lavoro aperto e
+        # le voci [v]/[x] traslocano nell'archivio. Contarle solo qui farebbe sparire tutto il
+        # fatto il giorno della potatura, con un salto nella curva che non corrisponde a niente.
+        # grep -c stampa comunque il numero ed esce 1 quando non trova nulla: un
+        # '|| echo 0' qui concatenerebbe due valori e romperebbe l'espressione aritmetica
+        DONE_ARCH=0
+        DROP_ARCH=0
+        if [ -f DONE.md ]; then
+            DONE_ARCH=$(grep -Ec '^- \[v\]' DONE.md)
+            DROP_ARCH=$(grep -Ec '^- \[x\]' DONE.md)
+        fi
+        DONE=$(( $(grep -Ec '^- \[v\]' TODO.md) + DONE_ARCH ))
+        DROP=$(( $(grep -Ec '^- \[x\]' TODO.md) + DROP_ARCH ))
 
-        TOT=$((TODO + DONE + DROP))
+        # dal 16/09/2026 il carico e' SOLO [ ]. [=] (in attesa di qualcuno, palla di un altro) e
+        # [?] (sospesa, non si sa se va fatta) restano lavoro conosciuto ma non sono lavoro suo:
+        # vanno nella colonna "attesa" invece di gonfiare il residuo. Prima [?] veniva sommata
+        # alle aperte, ed e' il disallineamento annotato in .claude/rules/file-di-progetto.md
+        # il 15/09: "32 mie, 29 su altri" e' l'informazione utile, "61 aperti" non lo e'
+        TOT=$((TODO + WAIT + DEEP + DONE + DROP))
 
         # si mostra il progetto anche quando non ha piu' nulla di aperto (prima era
         # "TODO -gt 0" e i progetti finiti sparivano dal cruscotto); il guardiano vero
@@ -70,6 +87,13 @@ for i in $(find $BASE -maxdepth 1 -type d | sort -h); do
             printf "%12s" "$DISALLINEAMENTI"
             printf " | "
             printf "%12s" "$((DONE + DROP)) vs. $TODO"
+            printf " | "
+            # "attesa" = [=] su altri + [?] sospese, mostrate come "3 + 2"; vuota se non ce n'e'
+            ATTESA=""
+            if [ $((WAIT + DEEP)) -gt 0 ]; then
+                ATTESA="$WAIT + $DEEP"
+            fi
+            printf "%12s" "$ATTESA"
             printf " | "
             printf "%12s" "$TOT"
 
