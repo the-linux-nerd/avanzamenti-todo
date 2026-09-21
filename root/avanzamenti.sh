@@ -171,6 +171,16 @@ echo "----------------------- | ------------------------------------------------
 ROWS=38
 ROWS=$((ROWS-NPRG))
 
+# NPRG cresce coi progetti ( uno per riga del cruscotto, uno in piu' per ogni SAL pianificata,
+# tre per l'intestazione delle SAL ), e ROWS e' quello che resta delle 38 righe di schermo.
+# Quando i progetti arrivano a consumarle tutte il conto va a zero e poi sotto zero, e
+# 'tail -n -3' per GNU tail non e' un errore: e' "le ultime tre". Quindi il grafico prima
+# sparisce del tutto ( ROWS=0, tail non stampa niente ) e poi ricomincia a crescere al
+# contrario, senza che niente segnali che il cruscotto sta mentendo. Oggi NPRG e' 26 su 38.
+if [ $ROWS -lt 1 ]; then
+    ROWS=1
+fi
+
 if [ -f $BASE/burndown.md ]; then
     tail -n $ROWS $BASE/burndown.md
 fi
