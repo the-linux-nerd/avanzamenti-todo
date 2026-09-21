@@ -40,10 +40,35 @@ for i in $(find $BASE -maxdepth 1 -type d | sort -h); do
 
     if [ -f TODO.md ]; then
 
-        DISALLINEAMENTI=$(ls | grep disallineamenti | wc -l)
+        # quante voci ci sono davvero da guardare, cioe' quante ne ha messe da parte
+        # l'ULTIMA raccolta e sono ancora diverse da quello che c'e' a monte.
+        #
+        # prima qui c'era 'ls | grep disallineamenti | wc -l', che contava la CARTELLA
+        # 'disallineamenti' e non il suo contenuto: valeva 1 per sempre su ogni deploy che
+        # ne avesse una e vuoto sugli altri. Non era un conteggio, era un "esiste", e
+        # leggendo il cruscotto sembrava che ci fosse sempre una voce aperta da smaltire
+        # anche il giorno in cui erano state promosse tutte.
+        #
+        # si guarda solo l'ultima raccolta perche' e' l'unica che descrive l'adesso: ogni
+        # giro notturno ri-raccoglie da capo tutto quello che ancora diverge, mentre le
+        # cartelle vecchie restano sul disco 30 giorni ( cron.daily/pulizia-disallineamenti-siti )
+        # con dentro roba gia' portata a monte. Sommarle darebbe un numero che non e' mai
+        # stato vero in nessun momento.
+        #
+        # e non si contano i .diff vuoti: sono i file che a monte sono gia' identici, si
+        # scartano senza guardarli e non sono lavoro di nessuno
+        DISALLINEAMENTI=""
 
-        if [ $DISALLINEAMENTI -eq 0 ]; then
-            DISALLINEAMENTI=""
+        ULTIMA=$( ls -1d disallineamenti/*/ 2>/dev/null | sort | tail -n 1 )
+
+        if [ -n "$ULTIMA" ]; then
+
+            DISALLINEAMENTI=$( find "$ULTIMA" -type f -name '*.diff' ! -empty | wc -l )
+
+            if [ "$DISALLINEAMENTI" -eq 0 ]; then
+                DISALLINEAMENTI=""
+            fi
+
         fi
 
         # conteggi ancorati a inizio riga, identici a quelli di cron.daily/burndown:
