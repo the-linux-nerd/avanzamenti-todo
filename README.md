@@ -56,6 +56,14 @@ Questo script aggiorna la burndown chart generale di tutti i progetti.
 ## /etc/cron.daily/upgrades
 Questo script aggiorna il framework per i progetti che hanno il file update.branch.conf installato.
 
+## /usr/local/bin/normalizza-urgenze.py e /etc/cron.d/normalizza-urgenze
+Ogni sera alle 21:30 toglie l'urgenza alle voci ferme: una `- [ ]` col primo flag a `!` che non
+cita nessuna data negli ultimi 14 giorni diventa `(-..)`, con `( declassata GG/MM/AAAA: ferma da
+N gg )` in coda alla riga. Restano fuori `[=]`, `[?]`, le voci con una data futura e quelle senza
+date. Senza `--applica` e' un'anteprima ( `-v` elenca le voci, `-p` filtra i progetti ). Il
+resoconto della sera va in `/var/log/normalizza-urgenze.log`. La regola e' di Fabio, dell'08/10/2026,
+ed e' scritta per i Claude nel regolamento della skill glisweb ( `riferimenti/cinque-file.md` ).
+
 ## /root/avanzamenti.sh
 Questo script rappresenta la situazione attuale di tutti i progetti.
 

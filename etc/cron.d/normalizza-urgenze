@@ -1,0 +1,5 @@
+# toglie il ! alle voci urgenti dei TODO.md ferme da piu' di 14 giorni ( regola dell'08/10/2026,
+# riferimenti/cinque-file.md della skill glisweb, "L'urgenza scade" ); resoconto in /var/log
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+30 21 * * * root /usr/local/bin/normalizza-urgenze.py --applica >> /var/log/normalizza-urgenze.log 2>&1
