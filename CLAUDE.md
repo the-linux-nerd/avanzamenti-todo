@@ -92,9 +92,9 @@ Other per-project / global files:
   `_src/_sh/_gw.upgrade.sh <branch>`. This assumes a separate framework convention
   that is not part of this repo.
 - `usr/local/bin/normalizza-urgenze.py` — the only Python piece, the only one that **writes**
-  `TODO.md`. An open `- [ ]` whose first flag is `!` and whose most recent cited date ( line or
+  `TODO.md`. An open `- [ ]` or suspended `- [?]` whose first flag is `!` and whose most recent cited date ( line or
   notes, `( aperta … )` included ) is more than 14 days old loses the `!` and gets
-  `( declassata DD/MM/YYYY: ferma da N gg )`. Skips `[=]`, `[?]`, items citing a future date and
+  `( declassata DD/MM/YYYY: ferma da N gg )`. Skips `[=]` ( `[?]` included since 12/10/2026 ), items citing a future date and
   items with no date. Writes under `flock` on the file, re-reading it under the lock, changing
   only the affected lines. Reads `BASE` from `/etc/avanzamenti.conf` by parsing, not sourcing.
   Dry run by default; `--applica` writes. Rule by Fabio, 08/10/2026.
